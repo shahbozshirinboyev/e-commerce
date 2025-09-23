@@ -1,0 +1,13 @@
+{
+  "app.title": "E-Commerce",
+  "nav.login": "Kirish",
+  "nav.register": "Ro'yxatdan o'tish",
+  "nav.dashboard": "Dashboard",
+  "nav.products": "Mahsulotlar",
+  "nav.orders": "Buyurtmalar",
+  "nav.profile": "Profil",
+  "logout": "Chiqish",
+  "search.placeholder": "Qidirish...",
+  "pagination.prev": "Oldingi",
+  "pagination.next": "Keyingi"
+}

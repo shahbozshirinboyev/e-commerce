@@ -1,0 +1,13 @@
+{
+  "app.title": "E-Commerce",
+  "nav.login": "Login",
+  "nav.register": "Register",
+  "nav.dashboard": "Dashboard",
+  "nav.products": "Products",
+  "nav.orders": "Orders",
+  "nav.profile": "Profile",
+  "logout": "Logout",
+  "search.placeholder": "Search...",
+  "pagination.prev": "Prev",
+  "pagination.next": "Next"
+}
