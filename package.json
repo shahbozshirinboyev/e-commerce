@@ -11,7 +11,13 @@
     "test:watch": "vitest --watch"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@fontsource/roboto": "^5.2.8",
     "@hookform/resolvers": "^3.9.0",
+    "@mui/icons-material": "^7.3.2",
+    "@mui/material": "^7.3.2",
+    "@mui/styled-engine-sc": "^7.3.2",
     "axios": "^1.7.7",
     "i18next": "^25.5.2",
     "next": "15.5.3",
@@ -20,6 +26,7 @@
     "react-hook-form": "^7.53.0",
     "react-hot-toast": "^2.4.1",
     "react-i18next": "^15.0.1",
+    "styled-components": "^6.1.19",
     "yup": "^1.4.0",
     "zustand": "^4.5.5"
   },

@@ -5,8 +5,11 @@ import * as yup from 'yup';
 import api from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
 import toast from 'react-hot-toast';
-import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
+import { Box, TextField, Button, Typography, Stack, InputAdornment } from '@mui/material';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Link from 'next/link';
 
 
 const schema = yup.object({
@@ -39,22 +42,47 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6">
-      <h1 className="text-xl font-semibold mb-4">Login</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-        <div>
-          <input {...register('username')} placeholder="Username" className="w-full border rounded px-3 py-2" name='username' />
-          {errors.username && <p className="text-red-600 text-sm">{errors.username.message}</p>}
-        </div>
-        <div>
-          <input type="password" {...register('password')} placeholder="Password" className="w-full border rounded px-3 py-2" name='password' />
-          {errors.password && <p className="text-red-600 text-sm">{errors.password.message}</p>}
-        </div>
-        <div className="pb-1">
-            Do you have an account? <Link href="/register" className="underline underline-offset-1">{t('nav.register')}</Link>
-        </div>
-        <button disabled={isSubmitting} className="w-full bg-gray-900 text-white rounded px-3 py-2">Login</button>
-      </form>
-    </div>
+    <Box sx={{ maxWidth: 420, mx: 'auto', p: 3 }}>
+      <Typography variant="h5" fontWeight={600} mb={2}>Kirish</Typography>
+      <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <Stack spacing={2.5}>
+          <TextField
+            label="Username"
+            fullWidth
+            {...register('username')}
+            error={!!errors.username}
+            helperText={errors.username?.message}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PersonOutlineIcon fontSize="small" />
+                </InputAdornment>
+              ),
+            }}
+          />
+          <TextField
+            label="Password"
+            type="password"
+            fullWidth
+            {...register('password')}
+            error={!!errors.password}
+            helperText={errors.password?.message}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockOutlinedIcon fontSize="small" />
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Hisobingiz yo'qmi? <Link href="/register" className='text-blue-500 hover:text-blue-700' >Ro'yxatdan o'tish</Link>
+          </Typography>
+          <Button type="submit" variant="contained" size="large" disabled={isSubmitting}>
+            {isSubmitting ? 'Signing in...' : 'Login'}
+          </Button>
+        </Stack>
+      </Box>
+    </Box>
   );
 }
