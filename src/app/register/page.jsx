@@ -4,6 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import { useAuthStore } from '@/stores/auth';
 import { Box, TextField, Button, Typography, Stack, InputAdornment } from '@mui/material';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
@@ -11,7 +12,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Link from 'next/link';
 
 const schema = yup.object({
-  name: yup.string().required('Name is required'),
+  username: yup.string().required('Username is required'),
   email: yup.string().email('Invalid email').required('Email is required'),
   password: yup.string().min(6, 'Minimum 6 characters').required('Password is required'),
   confirmPassword: yup
@@ -22,12 +23,26 @@ const schema = yup.object({
 
 export default function RegisterPage() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({ resolver: yupResolver(schema) });
+  const login = useAuthStore((s) => s.login);
 
   const onSubmit = async ({ confirmPassword, ...values }) => {
     try {
-      await api.post('/auth/register', values);
+      const { data } = await api.post('/auth/register', {
+        username: values.username,
+        password: values.password,
+        email: values.email,
+      }, {
+        headers: {
+          'Accept-Language': (typeof window !== 'undefined' ? localStorage.getItem('appLang') : null) || 'en',
+        },
+      });
+      const token = data?.data?.token || data?.token;
+      const user = data?.data || null; // contains username, email, role
+      if (token) {
+        login({ token, user });
+      }
       toast.success('Registered');
-      window.location.href = '/login';
+      window.location.href = '/dashboard';
     } catch (e) {
       toast.error(e?.response?.data?.message || 'Registration failed');
     }
@@ -41,9 +56,9 @@ export default function RegisterPage() {
           <TextField
             label="Username"
             fullWidth
-            {...register('name')}
-            error={!!errors.name}
-            helperText={errors.name?.message}
+            {...register('username')}
+            error={!!errors.username}
+            helperText={errors.username?.message}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -108,3 +123,4 @@ export default function RegisterPage() {
     </Box>
   );
 }
+
