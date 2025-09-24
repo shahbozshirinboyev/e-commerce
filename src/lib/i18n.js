@@ -3,7 +3,9 @@ import { initReactI18next } from 'react-i18next';
 import uz from '@/locales/uz.json';
 import en from '@/locales/en.json';
 
-const DEFAULT_LANG = process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE || 'uz';
+// Prefer persisted language; default to English on first load
+const STORED_LANG = typeof window !== 'undefined' ? localStorage.getItem('appLang') : null;
+const DEFAULT_LANG = STORED_LANG || 'en';
 
 if (!i18n.isInitialized) {
   i18n

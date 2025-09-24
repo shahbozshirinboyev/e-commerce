@@ -14,10 +14,20 @@ export default function ProductsPage() {
   const addItem = useCartStore((s) => s.addItem);
 
   const fetchData = async (opts = {}) => {
-    const params = { page, q, ...opts };
+    // Backend expects zero-based page index and returns Spring-style page payload
+    const params = { page: Math.max(0, (opts.page ?? page) - 1), size: 10, q, ...opts };
     const { data } = await api.get('/products', { params });
-    setItems(data.items);
-    setTotalPages(data.totalPages || 1);
+    const list = Array.isArray(data?.data?.content)
+      ? data.data.content
+      : Array.isArray(data?.content)
+      ? data.content
+      : Array.isArray(data)
+      ? data
+      : [];
+    setItems(list);
+    const pages = data?.data?.totalPages ?? data?.totalPages ?? 1;
+    setTotalPages(pages || 1);
+    console.log(data);
   };
 
   useEffect(() => { fetchData(); }, [page, q]);
@@ -29,7 +39,7 @@ export default function ProductsPage() {
         <SearchBar onSearch={(val) => { setPage(1); setQ(val); }} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {items.map((p) => (
+        {(Array.isArray(items) ? items : []).map((p) => (
           <ProductCard key={p.id} product={p} onAdd={addItem} />
         ))}
       </div>

@@ -17,6 +17,15 @@ export default function Providers({ children }) {
     return () => window.removeEventListener('app:unauthorized', onUnauthorized);
   }, [initialize]);
 
+  // Ensure persisted language is applied after refresh
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = localStorage.getItem('appLang');
+    if (stored && i18n.language !== stored) {
+      i18n.changeLanguage(stored);
+    }
+  }, []);
+
   return (
     <I18nextProvider i18n={i18n}>
       <Toaster position="top-right" />
