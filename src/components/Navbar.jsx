@@ -9,6 +9,7 @@ export default function Navbar() {
   const { t, i18n } = useTranslation();
   const { isAuthenticated, logout } = useAuthStore();
   const [ready, setReady] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
 
   const [scrolled, setScrolled] = useState(false);
@@ -50,6 +51,11 @@ export default function Navbar() {
     }
   };
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   if (!ready) {
     // Render minimal shell to preserve layout without translated text
     return (
@@ -81,22 +87,67 @@ export default function Navbar() {
           {t('app.title')}
         </Link>
         <div className="flex-1" />
-        <Link href="/dashboard" className={`${linkClass} ${pathname === '/dashboard' ? 'active' : ''}`}>{t('nav.dashboard')}</Link>
-        <Link href="/products" className={`${linkClass} ${pathname === '/products' ? 'active' : ''}`}>{t('nav.products')}</Link>
-        <Link href="/orders" className={`${linkClass} ${pathname === '/orders' ? 'active' : ''}`}>{t('nav.orders')}</Link>
-        {!isAuthenticated ? (
-          <>
+
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-2">
+          <Link href="/dashboard" className={`${linkClass} ${pathname === '/dashboard' ? 'active' : ''}`}>{t('nav.dashboard')}</Link>
+          <Link href="/products" className={`${linkClass} ${pathname === '/products' ? 'active' : ''}`}>{t('nav.products')}</Link>
+          <Link href="/orders" className={`${linkClass} ${pathname === '/orders' ? 'active' : ''}`}>{t('nav.orders')}</Link>
+          {!isAuthenticated ? (
             <Link href="/login" className={`${linkClass} ${pathname === '/login' ? 'active' : ''}`}>{t('nav.login')}</Link>
-          </>
-        ) : (
-          <button onClick={logout} className="ml-2 px-3 py-1 rounded bg-gray-900 text-white hover:opacity-90 transition-opacity">
-            {t('logout')}
+          ) : (
+            <button onClick={logout} className="ml-2 px-3 py-1 rounded bg-gray-900 text-white hover:opacity-90 transition-opacity">
+              {t('logout')}
+            </button>
+          )}
+          <button onClick={toggleLang} className="px-2 py-1 rounded border text-sm hover:bg-black/5 transition-colors" aria-label="Toggle language">
+            {(i18n.language || 'en').toUpperCase()}
           </button>
-        )}
-        <button onClick={toggleLang} className="px-2 py-1 rounded border text-sm hover:bg-black/5 transition-colors">
-          {(i18n.language || 'en').toUpperCase()}
+        </div>
+
+        {/* Mobile menu button */}
+        <button
+          type="button"
+          className="md:hidden inline-flex items-center justify-center rounded border px-2 py-1 text-sm hover:bg-black/5 transition-colors"
+          aria-label="Toggle navigation menu"
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen((v) => !v)}
+        >
+          {mobileOpen ? (
+            // Close icon
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+              <path fillRule="evenodd" d="M5.72 5.72a.75.75 0 011.06 0L12 10.94l5.22-5.22a.75.75 0 111.06 1.06L13.06 12l5.22 5.22a.75.75 0 11-1.06 1.06L12 13.06l-5.22 5.22a.75.75 0 11-1.06-1.06L10.94 12 5.72 6.78a.75.75 0 010-1.06z" clipRule="evenodd" />
+            </svg>
+          ) : (
+            // Hamburger icon
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          )}
         </button>
       </div>
+
+      {/* Mobile panel */}
+      {mobileOpen && (
+        <div className="md:hidden border-t bg-white/80 backdrop-blur">
+          <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-2">
+            <Link href="/dashboard" className={`${linkClass} ${pathname === '/dashboard' ? 'active' : ''}`}>{t('nav.dashboard')}</Link>
+            <Link href="/products" className={`${linkClass} ${pathname === '/products' ? 'active' : ''}`}>{t('nav.products')}</Link>
+            <Link href="/orders" className={`${linkClass} ${pathname === '/orders' ? 'active' : ''}`}>{t('nav.orders')}</Link>
+            {!isAuthenticated ? (
+              <Link href="/login" className={`${linkClass} ${pathname === '/login' ? 'active' : ''}`}>{t('nav.login')}</Link>
+            ) : (
+              <button onClick={logout} className="px-3 py-1 rounded bg-gray-900 text-white w-full text-left">
+                {t('logout')}
+              </button>
+            )}
+            <button onClick={toggleLang} className="px-2 py-1 rounded border text-sm hover:bg-black/5 transition-colors w-max" aria-label="Toggle language">
+              {(i18n.language || 'en').toUpperCase()}
+            </button>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
+
