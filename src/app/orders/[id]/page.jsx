@@ -3,10 +3,12 @@ import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import StatusDropdown from '@/components/StatusDropdown';
 import toast from 'react-hot-toast';
+import { useAuthStore } from '@/stores/auth';
 
 export default function OrderDetail({ params }) {
   const { id } = params;
   const [order, setOrder] = useState(null);
+  const isAdmin = useAuthStore((s) => s.isAdmin());
 
   useEffect(() => {
     (async () => {
@@ -20,6 +22,10 @@ export default function OrderDetail({ params }) {
   }, [id]);
 
   const onChange = async (status) => {
+    if (!isAdmin) {
+      toast.error('Admin access required');
+      return;
+    }
     try {
       const { data } = await api.patch(`/orders/${id}`, { status }, {
         headers: {
@@ -49,7 +55,7 @@ export default function OrderDetail({ params }) {
           <div className="text-lg font-semibold">Total: {Number(order.totalAmount || 0).toLocaleString()} so'm</div>
           <div className="mt-2">
             <span className="mr-2 font-medium">Status:</span>
-            <StatusDropdown status={order.status} onChange={onChange} />
+            <StatusDropdown status={order.status} onChange={onChange} disabled={!isAdmin} />
           </div>
         </div>
       </div>

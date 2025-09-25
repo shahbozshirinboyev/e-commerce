@@ -1,7 +1,7 @@
 "use client";
 
-export default function StatusDropdown({ status, onChange }) {
-  const disabled = status !== 'PENDING';
+export default function StatusDropdown({ status, onChange, disabled: disabledProp }) {
+  const disabled = typeof disabledProp === 'boolean' ? disabledProp : status !== 'PENDING';
   return (
     <select
       disabled={disabled}

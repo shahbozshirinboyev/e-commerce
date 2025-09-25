@@ -11,8 +11,14 @@ export const api = axios.create({
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem(TOKEN_KEY);
+    // Attach Authorization header if token exists
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Attach Accept-Language header based on persisted preference
+    const lang = localStorage.getItem('appLang') || 'en';
+    if (lang) {
+      config.headers['Accept-Language'] = lang;
     }
   }
   return config;

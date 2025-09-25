@@ -4,10 +4,14 @@ import { useAuthStore } from '@/stores/auth';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { useCartStore } from '@/stores/cart';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
   const { isAuthenticated, logout } = useAuthStore();
+  const items = useCartStore((s) => s.items);
+  const cartCount = (Array.isArray(items) ? items : []).reduce((n, i) => n + (Number(i.quantity) || 0), 0);
   const [ready, setReady] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -93,6 +97,14 @@ export default function Navbar() {
           <Link href="/dashboard" className={`${linkClass} ${pathname === '/dashboard' ? 'active' : ''}`}>{t('nav.dashboard')}</Link>
           <Link href="/products" className={`${linkClass} ${pathname === '/products' ? 'active' : ''}`}>{t('nav.products')}</Link>
           <Link href="/orders" className={`${linkClass} ${pathname === '/orders' ? 'active' : ''}`}>{t('nav.orders')}</Link>
+          <Link href="/orders/new" className={`${linkClass} ${pathname === '/orders/new' ? 'active' : ''} relative inline-flex items-center`} aria-label="Cart">
+            <ShoppingCartIcon fontSize="small" className="mr-1" />
+            {cartCount > 0 && (
+              <span className="inline-flex items-center justify-center min-w-[20px] h-5 text-xs px-1.5 rounded-full bg-blue-600 text-white" title={`Savat: ${cartCount}`}>
+                {cartCount}
+              </span>
+            )}
+          </Link>
           {!isAuthenticated ? (
             <Link href="/login" className={`${linkClass} ${pathname === '/login' ? 'active' : ''}`}>{t('nav.login')}</Link>
           ) : (
@@ -134,6 +146,14 @@ export default function Navbar() {
             <Link href="/dashboard" className={`${linkClass} ${pathname === '/dashboard' ? 'active' : ''}`}>{t('nav.dashboard')}</Link>
             <Link href="/products" className={`${linkClass} ${pathname === '/products' ? 'active' : ''}`}>{t('nav.products')}</Link>
             <Link href="/orders" className={`${linkClass} ${pathname === '/orders' ? 'active' : ''}`}>{t('nav.orders')}</Link>
+            <Link href="/orders/new" className={`${linkClass} ${pathname === '/orders/new' ? 'active' : ''} inline-flex items-center gap-2`} aria-label="Cart">
+              <ShoppingCartIcon fontSize="small" />
+              {cartCount > 0 && (
+                <span className="inline-flex items-center justify-center min-w-[20px] h-5 text-xs px-1.5 rounded-full bg-blue-600 text-white">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
             {!isAuthenticated ? (
               <Link href="/login" className={`${linkClass} ${pathname === '/login' ? 'active' : ''}`}>{t('nav.login')}</Link>
             ) : (

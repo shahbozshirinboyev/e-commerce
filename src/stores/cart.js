@@ -6,7 +6,12 @@ export const useCartStore = create(persist((set, get) => ({
 
   addItem: (item) => {
     const exists = get().items.find((i) => i.id === item.id);
-    if (exists) return; // Prevent duplicates
+    if (exists) {
+      // If item already in cart, increment quantity by 1 (or provided quantity)
+      const inc = Math.max(1, Number(item.quantity ?? 1));
+      set({ items: get().items.map((i) => (i.id === item.id ? { ...i, quantity: i.quantity + inc } : i)) });
+      return;
+    }
     set({ items: [...get().items, { ...item, quantity: item.quantity ?? 1 }] });
   },
 

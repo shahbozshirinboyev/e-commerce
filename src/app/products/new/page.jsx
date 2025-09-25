@@ -4,6 +4,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import { useAuthStore } from '@/stores/auth';
+import ErrorMessage from '@/components/ErrorMessage';
 
 const schema = yup.object({
   name: yup.string().required(),
@@ -12,6 +14,7 @@ const schema = yup.object({
 });
 
 export default function NewProductPage() {
+  const isAdmin = useAuthStore((s) => s.isAdmin());
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({ resolver: yupResolver(schema) });
   const onSubmit = async (values) => {
     try {
@@ -26,14 +29,17 @@ export default function NewProductPage() {
   return (
     <div className="max-w-md mx-auto p-6 space-y-3">
       <h1 className="text-xl font-semibold">New Product</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+      {!isAdmin && (
+        <ErrorMessage message={"You do not have permission to create products."} />
+      )}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3" onSubmitCapture={(e) => { if (!isAdmin) { e.preventDefault(); toast.error('Admin access required'); } }}>
         <input {...register('name')} placeholder="Name" className="w-full border rounded px-3 py-2" />
         {errors.name && <p className="text-red-600 text-sm">{errors.name.message}</p>}
         <input type="number" step="0.01" {...register('price')} placeholder="Price" className="w-full border rounded px-3 py-2" />
         {errors.price && <p className="text-red-600 text-sm">{errors.price.message}</p>}
         <input type="number" {...register('stock')} placeholder="Stock" className="w-full border rounded px-3 py-2" />
         {errors.stock && <p className="text-red-600 text-sm">{errors.stock.message}</p>}
-        <button disabled={isSubmitting} className="w-full bg-gray-900 text-white rounded px-3 py-2">Create</button>
+        <button disabled={isSubmitting || !isAdmin} className="w-full bg-gray-900 text-white rounded px-3 py-2">Create</button>
       </form>
     </div>
   );
