@@ -29,9 +29,16 @@ export default function LoginPage() {
           'Accept-Language': (typeof window !== 'undefined' ? localStorage.getItem('appLang') : null) || 'en',
         },
       });
-      console.log(data);
       const token = data?.data?.token || data?.token;
-      const user = data?.data?.user || data?.user || null;
+      // Build user object from response if not nested inside data.user
+      let user = data?.data?.user || data?.user || null;
+      if (!user) {
+        const src = data?.data || data || {};
+        const username = src.username ?? null;
+        const email = src.email ?? null;
+        const role = src.role ?? src.authorities ?? src.roles ?? null;
+        user = { username, email, role };
+      }
       if (!token) throw new Error('No token in response');
       login({ token, user });
       toast.success('Logged in');

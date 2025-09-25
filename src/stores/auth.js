@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 const TOKEN_KEY = process.env.NEXT_PUBLIC_JWT_STORAGE_KEY || 'authToken';
+const USER_KEY = 'authUser';
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -10,10 +11,17 @@ export const useAuthStore = create((set, get) => ({
   initialize: () => {
     if (typeof window === 'undefined') return;
     const token = localStorage.getItem(TOKEN_KEY);
+    const storedUser = localStorage.getItem(USER_KEY);
+    let user = null;
+    if (storedUser) {
+      try { user = JSON.parse(storedUser); } catch {}
+    }
     if (token) {
-      const payload = safeDecodeJwt(token);
-      const user = payload && (payload.user || { role: payload.role || payload.roles || payload.authorities });
-      set({ token, user: user || null, isAuthenticated: true });
+      if (!user) {
+        const payload = safeDecodeJwt(token);
+        user = payload && (payload.user || { role: payload.role || payload.roles || payload.authorities }) || null;
+      }
+      set({ token, user, isAuthenticated: true });
     }
   },
 
@@ -27,12 +35,18 @@ export const useAuthStore = create((set, get) => ({
       const payload = safeDecodeJwt(token);
       nextUser = payload && (payload.user || { role: payload.role || payload.roles || payload.authorities });
     }
+    if (typeof window !== 'undefined') {
+      try {
+        if (nextUser) localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
+      } catch {}
+    }
     set({ token, user: nextUser || null, isAuthenticated: !!token });
   },
 
   logout: () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
     }
     set({ token: null, user: null, isAuthenticated: false });
   },

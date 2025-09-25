@@ -6,10 +6,9 @@ import toast from 'react-hot-toast';
 import * as yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useAuthStore } from '@/stores/auth';
 
-const schema = yup.object({
-  email: yup.string().email().required(),
-});
+const schema = yup.object({});
 
 export default function NewOrderPage() {
   const items = useCartStore((s) => s.items);
@@ -17,13 +16,15 @@ export default function NewOrderPage() {
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
   const clear = useCartStore((s) => s.clear);
+  const userEmail = useAuthStore((s) => s.user?.email || '');
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({ resolver: yupResolver(schema) });
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (_values) => {
     if (items.length === 0) return toast.error('Cart is empty');
+    if (!userEmail) return toast.error('Email not available. Please login again.');
     try {
-      const { data } = await api.post('/orders', { ...values, items });
+      const { data } = await api.post('/orders', { email: userEmail, items });
       toast.success('Order created');
       clear();
       window.location.href = `/orders/${data.id}`;
@@ -53,11 +54,12 @@ export default function NewOrderPage() {
         )}
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-        <input {...register('email')} placeholder="Email" className="w-full border rounded px-3 py-2" />
-        {errors.email && <p className="text-red-600 text-sm">{errors.email.message}</p>}
-        <button disabled={isSubmitting || items.length === 0} className="w-full bg-gray-900 text-white rounded px-3 py-2">
+        <button disabled={isSubmitting || items.length === 0 || !userEmail} className="w-full bg-gray-900 text-white rounded px-3 py-2">
           {items.length === 0 ? 'Savat bo\'sh' : 'Buyurtmani tasdiqlash'}
         </button>
+        {!userEmail && (
+          <p className="text-red-600 text-sm">Email topilmadi. Iltimos qayta tizimga kiring.</p>
+        )}
       </form>
     </div>
   );

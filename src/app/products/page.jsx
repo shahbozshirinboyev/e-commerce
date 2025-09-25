@@ -27,7 +27,6 @@ export default function ProductsPage() {
     setItems(list);
     const pages = data?.data?.totalPages ?? data?.totalPages ?? 1;
     setTotalPages(pages || 1);
-    console.log(data);
   };
 
   useEffect(() => { fetchData(); }, [page, q]);

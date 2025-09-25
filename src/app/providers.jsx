@@ -19,6 +19,7 @@ export default function Providers({ children }) {
   const initialize = useAuthStore((s) => s.initialize);
   const [mode, setMode] = useState('light');
   const [emotionCache] = useState(() => createEmotionCache());
+  const [mounted, setMounted] = useState(false);
 
   // Load persisted theme mode
   useEffect(() => {
@@ -51,6 +52,11 @@ export default function Providers({ children }) {
     return () => window.removeEventListener('app:unauthorized', onUnauthorized);
   }, [initialize]);
 
+  // Ensure child-only client components (like Toaster) mount after hydration to avoid mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Ensure persisted language is applied after refresh
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -66,7 +72,7 @@ export default function Providers({ children }) {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <I18nextProvider i18n={i18n}>
-            <Toaster position="top-right" />
+            {mounted && <Toaster position="top-right" />}
             {children}
           </I18nextProvider>
         </ThemeProvider>

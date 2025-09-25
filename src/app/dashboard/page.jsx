@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import api from '@/lib/api';
+import { useAuthStore } from '@/stores/auth';
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -13,6 +14,7 @@ export default function DashboardPage() {
   });
   const [recentOrders, setRecentOrders] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
+  const isAdmin = useAuthStore((s) => s.isAdmin());
 
   useEffect(() => {
     (async () => {
@@ -36,18 +38,28 @@ export default function DashboardPage() {
         }));
         setRecentOrders(recent);
 
-        // 2) Overview stats (try endpoint first)
-        try {
-          const overviewRes = await api.get('/stats/overview', { headers: { 'Accept-Language': lang } });
-          const ov = overviewRes?.data?.data || overviewRes?.data || {};
-          setOverview({
-            totalOrders: ov.totalOrders ?? ordersPayload.totalElements ?? recent.length,
-            totalRevenue: ov.totalRevenue ?? 0,
-            delivered: ov.delivered ?? 0,
-            pending: ov.pending ?? 0,
-          });
-        } catch {
-          // Fallback: compute basic metrics from recent orders only (limited window)
+        // 2) Overview stats (admins call endpoint; others use fallback)
+        if (isAdmin) {
+          try {
+            const overviewRes = await api.get('/stats/overview', { headers: { 'Accept-Language': lang } });
+            const ov = overviewRes?.data?.data || overviewRes?.data || {};
+            setOverview({
+              totalOrders: ov.totalOrders ?? ordersPayload.totalElements ?? recent.length,
+              totalRevenue: ov.totalRevenue ?? 0,
+              delivered: ov.delivered ?? 0,
+              pending: ov.pending ?? 0,
+            });
+          } catch {
+            const delivered = recent.filter((o) => String(o.status).toUpperCase() === 'DELIVERED').length;
+            const pending = recent.filter((o) => String(o.status).toUpperCase() === 'PENDING').length;
+            setOverview({
+              totalOrders: ordersPayload.totalElements ?? recent.length,
+              totalRevenue: recent.reduce((s, o) => s + (o.total || 0), 0),
+              delivered,
+              pending,
+            });
+          }
+        } else {
           const delivered = recent.filter((o) => String(o.status).toUpperCase() === 'DELIVERED').length;
           const pending = recent.filter((o) => String(o.status).toUpperCase() === 'PENDING').length;
           setOverview({
@@ -58,25 +70,40 @@ export default function DashboardPage() {
           });
         }
 
-        // 3) Top products (try endpoint first)
-        try {
-          const topRes = await api.get('/stats/top-products', {
-            params: { size: 5 },
-            headers: { 'Accept-Language': lang },
-          });
-          const tp = topRes?.data?.data || topRes?.data || [];
-          // Normalize
-          const normalized = Array.isArray(tp)
-            ? tp.map((p, idx) => ({
-                id: p.id ?? idx,
-                name: p.name ?? p.productName ?? 'Product',
-                sold: p.sold ?? p.quantity ?? 0,
-                revenue: p.revenue ?? 0,
-              }))
-            : [];
-          setTopProducts(normalized);
-        } catch {
-          // Fallback: aggregate from recent orders items
+        // 3) Top products (admins call endpoint; others use fallback)
+        if (isAdmin) {
+          try {
+            const topRes = await api.get('/stats/top-products', {
+              params: { size: 5 },
+              headers: { 'Accept-Language': lang },
+            });
+            const tp = topRes?.data?.data || topRes?.data || [];
+            const normalized = Array.isArray(tp)
+              ? tp.map((p, idx) => ({
+                  id: p.id ?? idx,
+                  name: p.name ?? p.productName ?? 'Product',
+                  sold: p.sold ?? p.quantity ?? 0,
+                  revenue: p.revenue ?? 0,
+                }))
+              : [];
+            setTopProducts(normalized);
+          } catch {
+            const map = new Map();
+            for (const o of recent) {
+              for (const it of o.items) {
+                const key = it.productId ?? it.productName;
+                const entry = map.get(key) || { id: key, name: it.productName, sold: 0, revenue: 0 };
+                entry.sold += it.quantity || 0;
+                entry.revenue += it.totalPrice || (it.unitPrice || 0) * (it.quantity || 0);
+                map.set(key, entry);
+              }
+            }
+            const arr = Array.from(map.values())
+              .sort((a, b) => b.sold - a.sold)
+              .slice(0, 5);
+            setTopProducts(arr);
+          }
+        } else {
           const map = new Map();
           for (const o of recent) {
             for (const it of o.items) {
@@ -96,7 +123,7 @@ export default function DashboardPage() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [isAdmin]);
 
   const cards = useMemo(() => ([
     { title: 'Total Orders', value: overview.totalOrders },

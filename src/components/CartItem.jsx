@@ -1,4 +1,5 @@
 "use client";
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 export default function CartItem({ item, onQty, onRemove }) {
   return (
@@ -21,7 +22,7 @@ export default function CartItem({ item, onQty, onRemove }) {
           className="px-2 py-1 text-sm rounded border hover:bg-black/5"
           aria-label="Remove item"
         >
-          Remove
+          <DeleteOutlineIcon fontSize="small" />
         </button>
       </div>
     </div>
