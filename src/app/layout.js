@@ -1,7 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
-import Navbar from "@/components/Navbar";
+import ClientNavbar from "@/components/ClientNavbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,13 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "E-Commerce",
-  description: "E-Commerce demo app",
+  title: "E-commerce App",
+  description: "Modern e-commerce application",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Emotion SSR insertion point for MUI styles */}
         <meta name="emotion-insertion-point" content="" />
@@ -31,7 +31,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
-          <Navbar />
+          <ClientNavbar />
           <main className="min-h-screen">{children}</main>
         </Providers>
       </body>
