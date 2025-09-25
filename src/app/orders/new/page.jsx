@@ -49,7 +49,7 @@ export default function NewOrderPage() {
                 onRemove={() => removeItem(item.id)}
               />
             ))}
-            <div className="text-right font-medium">Total: ${total.toFixed(2)}</div>
+            <div className="text-right font-medium">Total: UZS {total?.toLocaleString("uz-UZ", { minimumFractionDigits: 2 })}</div>
           </>
         )}
       </div>

@@ -6,7 +6,9 @@ export default function CartItem({ item, onQty, onRemove }) {
     <div className="flex items-center justify-between border-b py-2 gap-3">
       <div className="flex-1 min-w-0">
         <div className="font-medium">{item.name}</div>
-        <div className="text-sm text-gray-600">${item.price?.toFixed(2)}</div>
+        <div className="text-sm text-gray-600">
+          UZS {item.price?.toLocaleString("uz-UZ", { minimumFractionDigits: 2 })}
+        </div>
       </div>
       <div className="flex items-center gap-2">
         <input
