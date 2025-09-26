@@ -1,6 +1,7 @@
 // src/app/page.jsx
-import DashboardPage from "./dashboard/page";
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-  return <DashboardPage />;
+  redirect('/dashboard');
+  return null;
 }
