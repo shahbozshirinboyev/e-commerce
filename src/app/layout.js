@@ -1,7 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
-import ClientNavbar from "@/components/ClientNavbar";
+import ClientNavbarWrapper from "@/components/ClientNavbarWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,12 +26,12 @@ export default function RootLayout({ children }) {
         <meta name="emotion-insertion-point" content="" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=info"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=info&display=optional"
         />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
-          <ClientNavbar />
+          <ClientNavbarWrapper />
           <main className="min-h-screen">{children}</main>
         </Providers>
       </body>

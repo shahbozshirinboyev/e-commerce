@@ -76,6 +76,7 @@ export default function Navbar() {
         aria-hidden
         style={{ width: `${progress}%` }}
         className="h-[2px] bg-blue-600 transition-[width] duration-150"
+        suppressHydrationWarning
       />
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
         <Link href="/" className="font-semibold nav-logo transition-transform duration-300 hover:scale-[1.02]">
